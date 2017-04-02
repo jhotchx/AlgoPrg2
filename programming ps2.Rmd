@@ -1,0 +1,58 @@
+---
+title: "Programming PS2"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+# Analytic determination of crossover point
+If we are treating all operations as equal cost, we can find the optimal crossover point between Strassen's algorithm and the conventional approach to matrix multiplication by simply finding the point at which the number of operations equalizes. 
+
+For the conventional approach, we have $n^{3}$ multiplications and $n^{3}-n^{2}$ additions:
+
+$$
+\begin{array}{c|c|c|c|c|c}
+n & \text{multiplications} & \text{additions} & \text{total} \\ \hline
+2 & 8 & 4 & 12 \\ \hline
+4 & 64 & 48 & 112 \\ \hline
+8 & 512 & 448 & 960 \\ \hline
+16 & 4096 & 3840 & 7936 \\ \hline
+32 & 32678 & 31744 & 64512 \\ \hline
+64 & 262144 & 258048 & 520192 
+\end{array}
+$$
+
+For Strassen's algorithm, we will have a recursion tree of depth $\log_2{n}+1$, where  level i of the tree (root is 0) will have $7^{i}$ nodes. Thus, we will have a total of $\sum_{i=0}^{\log_2{n}}7^{i}$ recursive calls. Since we only do the multiplications at the leaves of the tree, we will have 18 operations (11 additions and 7 subtractions) for every non-leaf call, and a multiplication operation for every leaf. In total, we will have $\sum_{i=0}^{\log_2{n-1}}[7^{i}*18]+7^{\log_2{n}}$ operations:
+
+$$
+\begin{array}{c|c|c|c|c|c}
+n & \text{recursive calls} &\text{total operations} \\ \hline
+2 & 8 & `r 1*18+7` \\ \hline
+4 & 57 & `r (1+7)*18+49`\\ \hline
+8 & 400 & `r (1+7+49)*18 + 343` \\ \hline
+16 & 2801 & `r (1+7+49+343)*18 + 2401` \\ \hline
+32 & 19608 & `r (1+7+49+343+2401)*18 + 16807` \\ \hline
+64 & 137257 & `r (1+7+49+343+2401+16807)*18 + 117649`
+\end{array}
+$$
+The crossover point is clearly somewhere between n = 32 and n = 64, we can set the equations equal to determine it exactly: 
+$$
+2*n^3-n^2=\sum_{i=0}^{\log_2{n}-1} (7^i*18) + 7^{\log_2{n}}$$
+Wolfram says exact crossover is 39.049
+
+$\lceil{\log_2{n}}\rceil+1$. Thus, we will have a total of $\sum_{i=0}^{\lceil{\log_2{n}}\rceil}7^{i}$ recursive calls (ceiling comes from padding the matrices with zeroes until it is divisible by 2). Since we only do the multiplications at the leaves of the tree, we will have 16 operations (11 additions and 5 subtractions) for every non-leaf call, and a multiplication operation for every leaf. In total, we will have $\sum_{i=0}^{\lceil{\log_2{n}\rceil}}[7^{i}*18]+7^{\log_2{n}}$ operations:
+
+$$
+\begin{array}{c|c|c|c|c|c}
+n & \text{recursive calls} &\text{total operations} \\ \hline
+2 & 8 & `r 1*18+7` \\ \hline
+4 & 57 & `r (1+7)*18+49`\\ \hline
+8 & 400 & `r (1+7+49)*18 + 343` \\ \hline
+16 & 2801 & `r (1+7+49+343)*18 + 2401` \\ \hline
+32 & 19608 & `r (1+7+49+343+2401)*18 + 16807`
+64 & 137257 & `r (1+7+49+343+2401+16807)*18 + 117649`
+\end{array}
+$$
+
+# Experimental determination of crossover point
+So, it is clear that, in theory, the crossover point is somewhere between n = 16 and n = 32. In practice, since we have to pad the sub-matrices with zeroes in order to make them divisible by 2, the number of operations for Strassen's algorithm only changes as n passes a power of 2 (i.e. Strassen's takes 61623 operations for n=17,18,...,32), so to find the exact crossover point, we just need to find n such that the conventional approach yields more than 61623 operations. This turns out to be at n=32.  

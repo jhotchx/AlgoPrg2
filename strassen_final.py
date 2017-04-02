@@ -1,5 +1,6 @@
 import random
 from math import ceil,log
+import sys
 
 def generateMatrix(dimension, kind):
     # choose from 0,1
@@ -62,7 +63,6 @@ def strassen(d,AMat,BMat,cutOff=3):
 
 def matmult(a,b):
     zip_b = zip(*b)
-    # uncomment next line if python 3 : 
     zip_b = list(zip_b)
     return [[sum(ele_a*ele_b for ele_a, ele_b in zip(row_a, col_b)) 
              for col_b in zip_b] for row_a in a]
@@ -143,9 +143,9 @@ def wrapstras(d,A,B,cutoff):
     return(finalmat)
 
 if __name__ == "__main__":
-    dimension = int(input("Enter the dimension for the matrices: "))
-    kind = int(input("what kind of numbers would you like: "))
-    cutoff = int(input("When should we switch to the normal algorithm: "))
+    dimension = int(sys.argv[1])
+    cutoff = int(sys.argv[2])
+    kind = int(sys.argv[3])
     A = generateMatrix(dimension, kind)
     B = generateMatrix(dimension, kind)
     print(wrapstras(dimension,A,B,cutoff))

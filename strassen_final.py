@@ -16,28 +16,37 @@ def generateMatrix(dimension, kind):
         randomMatrix = [[random.random() for e in range(dimension)] for e in range(dimension)]  
     return(randomMatrix)
 
-@profile
-def strassen(AMat,BMat,cutOff=3):
-    n = len(AMat)
-    if n <=cutOff:
+#@profile
+def strassen(d,AMat,BMat,cutOff=3):
+    if d <=cutOff:
         return(matmult(AMat,BMat))
     else:
-        A,B,C,D = subset(AMat)
-        E,F,G,H = subset(BMat)
+        chunksize = ceil(d/2)
+
+        A = subset_matrix(AMat,1,1,chunksize)
+        B = subset_matrix(AMat,1,2,chunksize)
+        C = subset_matrix(AMat,2,1,chunksize)
+        D = subset_matrix(AMat,2,2,chunksize)
+        
+        E = subset_matrix(BMat,1,1,chunksize)
+        F = subset_matrix(BMat,1,2,chunksize)
+        G = subset_matrix(BMat,2,1,chunksize)
+        H = subset_matrix(BMat,2,2,chunksize)
+
         # P1 = A(F-H)
-        P1 = strassen(A,subtract(F,H))
+        P1 = strassen(chunksize,A,subtract(F,H))
         # P2 = (A+B)*H
-        P2 = strassen(add(A,B),H)
+        P2 = strassen(chunksize,add(A,B),H)
         # P3 = (C+D)*E
-        P3 = strassen(add(C,D),E)
+        P3 = strassen(chunksize,add(C,D),E)
         #P4 = D*(G-E)
-        P4 = strassen(D,subtract(G,E))
+        P4 = strassen(chunksize,D,subtract(G,E))
         #P5 = (A+D)(E+H)
-        P5 = strassen(add(A,D),add(E,H))
+        P5 = strassen(chunksize,add(A,D),add(E,H))
         #P6 = (B-D)(G+H)
-        P6 = strassen(subtract(B,D),add(G,H))
+        P6 = strassen(chunksize,subtract(B,D),add(G,H))
         #P7 = (A-C)(E+F)
-        P7 = strassen(subtract(A,C),add(E,F))
+        P7 = strassen(chunksize,subtract(A,C),add(E,F))
         # add terms to get final result
         #C1 = AE+BG = P4+P5-P2+P6
         C1 = add(subtract(add(P4,P5),P2),P6)
@@ -58,24 +67,46 @@ def matmult(a,b):
     return [[sum(ele_a*ele_b for ele_a, ele_b in zip(row_a, col_b)) 
              for col_b in zip_b] for row_a in a]
 
-def subset(A):
-    nextPowerOfTwo = lambda n: 2**int(ceil(log(n,2)))
-    n = len(A)/2
-    m = nextPowerOfTwo(n)
-    A1 = [[0 for i in range(m)] for j in range(m)]
-    A2 = [[0 for i in range(m)] for j in range(m)]
-    A3 = [[0 for i in range(m)] for j in range(m)]
-    A4 = [[0 for i in range(m)] for j in range(m)]
-    n = int(n)
-    for i in range(n):
-        A1[i][0:n]=(A[i][0:n])
-    for i in range(0,n):
-        A2[i][0:n]=(A[i][n:n*2])
-    for i in range(n):
-        A3[i][0:n]=(A[i+n][0:n])
-    for i in range(n):
-        A4[i][0:n]=(A[i+n][n:n*2])
-    return(A1,A2,A3,A4)
+def subset_matrix(M,x,y,d):
+    padr = False
+    padc = False
+    if len(M)%d!=0:
+        if x==2:
+            padr = True
+        if y==2:
+            padc = True
+        
+    if x==1:
+        rs = 0
+        re = d
+    elif x==2:
+        rs = d
+        if padr==True:
+            re = 2*d - 1
+        else:
+            re = 2*d
+        
+    if y==1:
+        cs = 0
+        ce = d
+    elif y==2:
+        cs = d
+        if padc==True:
+            ce = 2*d - 1
+        else:
+            ce = 2*d
+        
+    mat = [None]*d
+    j = 0
+    for i in range(rs,re):
+        row = M[i][cs:ce]
+        if padc==True:
+            row.append(0)
+        mat[j] = row
+        j += 1
+    if padr==True:
+        mat[j] = [0]*d
+    return(mat)
 
 
 def add(A,B):
@@ -103,11 +134,19 @@ def compile_matrix(C11,C12,C21,C22):
         C21[j].extend(C22[j])
     return(C11 + C21)
 
+def wrapstras(d,A,B,cutoff):
+    finalmat = strassen(d,A,B,cutoff)
+    if d%2!=0:
+        for i in range(d):
+            finalmat[i] = finalmat[i][:-1]
+        finalmat.remove([0]*(d+1))
+    return(finalmat)
+
 if __name__ == "__main__":
     dimension = int(input("Enter the dimension for the matrices: "))
     kind = int(input("what kind of numbers would you like: "))
     cutoff = int(input("When should we switch to the normal algorithm: "))
     A = generateMatrix(dimension, kind)
     B = generateMatrix(dimension, kind)
-    strassen(A,B,cutoff)
+    print(wrapstras(dimension,A,B,cutoff))
 

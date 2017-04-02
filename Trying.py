@@ -108,7 +108,7 @@ def compile_matrix(C11,C12,C21,C22):
         C21[j].extend(C22[j])
     return(C11 + C21)
 
-#@profile
+@profile
 def strassen(d,A,B,cutoff):
     # d = one dimension of matrix
     # A = dxd matrix
@@ -164,7 +164,7 @@ def wrapstras(d,A,B,cutoff):
         finalmat.remove([0]*(d+1))
     return(finalmat)
 
-n = 15
+n = 100
 TEST  = generateMatrix(n,0)
 TEST2 = generateMatrix(n,0)
 wrapstras(n,TEST,TEST2,3)

@@ -2,6 +2,26 @@ import random
 from math import ceil,log
 import sys
 
+def process_inputfile(d,inputfile):
+    A = [[0 for e in range(d)] for e in range(d)]
+    B = [[0 for e in range(d)] for e in range(d)]
+    i = 0
+    j = 0
+    M = A
+    with open(inputfile) as f:
+        for line in f:
+            M[i][j] = float(line)
+            if j==(d-1) and i==(d-1):
+                M = B
+                i = 0
+                j = 0
+            elif j==(d-1):
+                j = 0
+                i += 1
+            else:
+                j +=1
+    return(A,B)   
+
 def generateMatrix(dimension, kind):
     # choose from 0,1
     if kind ==0:
@@ -142,11 +162,30 @@ def wrapstras(d,A,B,cutoff):
         finalmat.remove([0]*(d+1))
     return(finalmat)
 
+def get_diag(d,C):
+    diagvals = [None]*d
+    for i in range(d):
+        diagvals[i] = C[i][i]
+    return(diagvals)
+
 if __name__ == "__main__":
     dimension = int(sys.argv[1])
     cutoff = int(sys.argv[2])
-    kind = int(sys.argv[3])
-    A = generateMatrix(dimension, kind)
-    B = generateMatrix(dimension, kind)
-    print(wrapstras(dimension,A,B,cutoff))
+    inputfile = sys.argv[3]
+    kind = int(sys.argv[4])
+    
+    with open('test','w') as outFile:
+       mat = generateMatrix(4,0)
+       aNumbers = [item for sublist in A for item in sublist]
+       bNumbers = [item for sublist in B for item in sublist]
+       for num in aNumbers:
+           outFile.write(str(num)+'\n')
+       for num in bNumbers:
+           outFile.write(str(num)+'\n')
+    A,B = process_inputfile(dimension,inputfile)
+    #A = generateMatrix(dimension, kind)
+    #B = generateMatrix(dimension, kind)
+    C = wrapstras(dimension,A,B,cutoff)
+    print(get_diag(dimension,C))
+    
 

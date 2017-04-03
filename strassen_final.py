@@ -173,15 +173,6 @@ if __name__ == "__main__":
     cutoff = int(sys.argv[2])
     inputfile = sys.argv[3]
     kind = int(sys.argv[4])
-    
-    with open('test','w') as outFile:
-       mat = generateMatrix(4,0)
-       aNumbers = [item for sublist in A for item in sublist]
-       bNumbers = [item for sublist in B for item in sublist]
-       for num in aNumbers:
-           outFile.write(str(num)+'\n')
-       for num in bNumbers:
-           outFile.write(str(num)+'\n')
     A,B = process_inputfile(dimension,inputfile)
     #A = generateMatrix(dimension, kind)
     #B = generateMatrix(dimension, kind)

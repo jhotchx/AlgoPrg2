@@ -37,6 +37,17 @@ def generateMatrix(dimension, kind):
         randomMatrix = [[random.random() for e in range(dimension)] for e in range(dimension)]  
     return(randomMatrix)
 
+def genFile(dimension,kind):
+   with open('test','w') as outFile:
+       A = generateMatrix(dimension,kind)
+       B = generateMatrix(dimension,kind)
+       aNumbers = [item for sublist in A for item in sublist]
+       bNumbers = [item for sublist in B for item in sublist]
+       for num in aNumbers:
+           outFile.write(str(num)+'\n')
+       for num in bNumbers:
+           outFile.write(str(num)+'\n')
+
 #@profile
 def strassen(d,AMat,BMat,cutOff=3):
     if d <=cutOff:
@@ -169,13 +180,11 @@ def get_diag(d,C):
     return(diagvals)
 
 if __name__ == "__main__":
-    dimension = int(sys.argv[1])
-    cutoff = int(sys.argv[2])
-    inputfile = sys.argv[3]
-    kind = int(sys.argv[4])
+    dimension = int(sys.argv[2])
+    cutoff = int(sys.argv[3])
+    inputfile = sys.argv[4]
+    genFile(dimension,0)
     A,B = process_inputfile(dimension,inputfile)
-    #A = generateMatrix(dimension, kind)
-    #B = generateMatrix(dimension, kind)
     C = wrapstras(dimension,A,B,cutoff)
     print(get_diag(dimension,C))
     

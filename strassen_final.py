@@ -50,6 +50,7 @@ def genFile(dimension,kind):
             outFile.write(str(num)+'\n')
 
 calls=0
+#@profile
 def strassen(d,AMat,BMat,cutoff):
     global calls
     calls+=1
@@ -193,11 +194,7 @@ if __name__ == "__main__":
    A,B = process_inputfile(dimension,'test')
    begin = time.clock()
    C = wrapstras(dimension,A,B,cutoff)
-   print(C)
    print(get_diag(dimension,C))
    print(time.clock()-begin,calls)
-   
 
-   
-    
 

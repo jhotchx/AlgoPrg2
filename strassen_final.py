@@ -1,6 +1,7 @@
 import random
 from math import ceil,log
 import sys
+import time 
 
 def process_inputfile(d,inputfile):
     A = [[0 for e in range(d)] for e in range(d)]
@@ -38,47 +39,47 @@ def generateMatrix(dimension, kind):
     return(randomMatrix)
 
 def genFile(dimension,kind):
-   with open('test','w') as outFile:
-       A = generateMatrix(dimension,kind)
-       B = generateMatrix(dimension,kind)
-       aNumbers = [item for sublist in A for item in sublist]
-       bNumbers = [item for sublist in B for item in sublist]
-       for num in aNumbers:
-           outFile.write(str(num)+'\n')
-       for num in bNumbers:
-           outFile.write(str(num)+'\n')
+    with open('test','w') as outFile:
+        A = generateMatrix(dimension,kind)
+        B = generateMatrix(dimension,kind)
+        aNumbers = [item for sublist in A for item in sublist]
+        bNumbers = [item for sublist in B for item in sublist]
+        for num in aNumbers:
+            outFile.write(str(num)+'\n')
+        for num in bNumbers:
+            outFile.write(str(num)+'\n')
 
+calls=0
 #@profile
-def strassen(d,AMat,BMat,cutOff=3):
-    if d <=cutOff:
+def strassen(d,AMat,BMat,cutoff):
+    global calls
+    calls+=1
+    if d <=cutoff:
         return(matmult(AMat,BMat))
     else:
         chunksize = ceil(d/2)
-
         A = subset_matrix(AMat,1,1,chunksize)
         B = subset_matrix(AMat,1,2,chunksize)
         C = subset_matrix(AMat,2,1,chunksize)
         D = subset_matrix(AMat,2,2,chunksize)
-        
         E = subset_matrix(BMat,1,1,chunksize)
         F = subset_matrix(BMat,1,2,chunksize)
         G = subset_matrix(BMat,2,1,chunksize)
         H = subset_matrix(BMat,2,2,chunksize)
-
-        # P1 = A(F-H)
-        P1 = strassen(chunksize,A,subtract(F,H))
+        #P1 = A(F-H)
+        P1 = strassen(chunksize,A,subtract(F,H),cutoff)
         # P2 = (A+B)*H
-        P2 = strassen(chunksize,add(A,B),H)
+        P2 = strassen(chunksize,add(A,B),H,cutoff)
         # P3 = (C+D)*E
-        P3 = strassen(chunksize,add(C,D),E)
+        P3 = strassen(chunksize,add(C,D),E,cutoff)
         #P4 = D*(G-E)
-        P4 = strassen(chunksize,D,subtract(G,E))
+        P4 = strassen(chunksize,D,subtract(G,E),cutoff)
         #P5 = (A+D)(E+H)
-        P5 = strassen(chunksize,add(A,D),add(E,H))
+        P5 = strassen(chunksize,add(A,D),add(E,H),cutoff)
         #P6 = (B-D)(G+H)
-        P6 = strassen(chunksize,subtract(B,D),add(G,H))
+        P6 = strassen(chunksize,subtract(B,D),add(G,H),cutoff)
         #P7 = (A-C)(E+F)
-        P7 = strassen(chunksize,subtract(A,C),add(E,F))
+        P7 = strassen(chunksize,subtract(A,C),add(E,F),cutoff)
         # add terms to get final result
         #C1 = AE+BG = P4+P5-P2+P6
         C1 = add(subtract(add(P4,P5),P2),P6)
@@ -92,11 +93,13 @@ def strassen(d,AMat,BMat,cutOff=3):
     out = compile_matrix(C1,C2,C3,C4)
     return(out)
 
+#@profile
 def matmult(a,b):
     zip_b = zip(*b)
     zip_b = list(zip_b)
     return [[sum(ele_a*ele_b for ele_a, ele_b in zip(row_a, col_b)) 
              for col_b in zip_b] for row_a in a]
+
 
 def subset_matrix(M,x,y,d):
     padr = False
@@ -165,12 +168,15 @@ def compile_matrix(C11,C12,C21,C22):
         C21[j].extend(C22[j])
     return(C11 + C21)
 
+#@profile
 def wrapstras(d,A,B,cutoff):
     finalmat = strassen(d,A,B,cutoff)
     if d%2!=0:
-        for i in range(d):
-            finalmat[i] = finalmat[i][:-1]
-        finalmat.remove([0]*(d+1))
+        try:
+            finalmat.remove([0]*(2**int(ceil(log(d,2)))))
+        except:
+            for i in range(d):
+                finalmat[i] = finalmat[i][:-1]
     return(finalmat)
 
 def get_diag(d,C):
@@ -179,13 +185,16 @@ def get_diag(d,C):
         diagvals[i] = C[i][i]
     return(diagvals)
 
+
 if __name__ == "__main__":
-    dimension = int(sys.argv[2])
-    cutoff = int(sys.argv[3])
-    inputfile = sys.argv[4]
-    genFile(dimension,0)
-    A,B = process_inputfile(dimension,inputfile)
-    C = wrapstras(dimension,A,B,cutoff)
-    print(get_diag(dimension,C))
-    
+   dimension = int(sys.argv[2])
+   cutoff = int(sys.argv[3])
+   inputfile = sys.argv[4]
+   inputfile = genFile(dimension,0)
+   A,B = process_inputfile(dimension,'test')
+   begin = time.clock()
+   C = wrapstras(dimension,A,B,cutoff)
+   print(get_diag(dimension,C))
+   print(time.clock()-begin,calls)
+
 

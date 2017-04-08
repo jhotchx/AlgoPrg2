@@ -55,4 +55,85 @@ n & \text{recursive calls} &\text{total operations} \\ \hline
 $$
 
 # Experimental determination of crossover point
-So, it is clear that, in theory, the crossover point is somewhere between n = 16 and n = 32. In practice, since we have to pad the sub-matrices with zeroes in order to make them divisible by 2, the number of operations for Strassen's algorithm only changes as n passes a power of 2 (i.e. Strassen's takes 61623 operations for n=17,18,...,32), so to find the exact crossover point, we just need to find n such that the conventional approach yields more than 61623 operations. This turns out to be at n=32.  
+Determining an exact cross-over point for Strassen's algorithm is difficult experimentally due to the way that a cross-over point behaves within Strassen's algorithm and minor differences between runtimes as a result of other processes running on the system.  In particular, functional cutoff points for any multiplication of 2 $nxn$ matrices are not on a continuous scale.  For example, when $n=16$, the meaningful cutoff points are all powers of 2: 16,8,4,2.  By meaningful, we mean it is clear that any cutoff between 4 and 7 will still cause the same number of recursions for Strassen's, and therefore will not change the runtime. Therefore, for a given $n$, it is easy to find the optimal cutoff, but it is difficult to find a cross-over point for a general $n$.
+
+Consider the following experiment runtimes searching for an initial guess at the optimal cross-over point.
+$$
+\begin{array}{c|c|c|c|c|c}
+n & \text{cutoff}   & \text{calls to Strassen's} &\text{time in seconds} \\ \hline
+1024 & 32  & 19608  & 91.726  \\ 
+1024 & 64  & 2801   & 79.359  \\ 
+1024 & 128 & 400    & 77.546  \\ 
+1024 & 256 & 57     & 83.502  \\ 
+1024 & 512 & 8      & 102.572 \\ \hline
+2048 & 32  & 137257 & 667.668 \\ 
+2048 & 64  & 19608  & 570.039 \\ 
+2048 & 128 & 2801   & 531.440 \\ 
+2048 & 256 & 400    & 645.420 \\ 
+2048 & 512 & 57     & 759.996 \\ \hline
+\end{array}
+$$
+We can be sure based on the data above that the optimal cross-over point for $n=1024$ and $n=2048$ is 128.  We would expect them to be the same, due to the definition of the cross-over point, but it is good to have confirmation.
+
+However, recall from above that for any cross-over point, $c$, such that $128\leq c<256$, Strassen's would have the same running time for the values of $n$ chosen above.  This means that really we have found a lower bound on the optimal, general $n$.  If we were to decide the optimal point was less than 128, it would no longer be optimal for these $n$ values, and therefore not optimal generally.
+
+These tests make it clear that the optimal cross-over is between 64 and 256, as indicated by the optimal runtime occurring for 128.  In order to further narrow down the timing, we can choose $n$ inentionally to shorten the gap.  Consider targeting a cross-over point.  In particular, an ideal value of $n$ for testing would utilize the desired cross-over point that we want to check (i.e. that cross-over point will apply to some $c^*=\frac{n}{2}$ recursion for that $n$ such that if the cross-over point were $c^*-1$, Strassen would recurse additional times).
+
+In short, to check a target cross-over point, $c^*$, we need an $n$ for which it is a meaningful cross-over point, and to run the following tests:
+
+1. $n$ with a $c^*$ cross-over
+2. $n$ with a $\dfrac{c^*}{2}$ cross-over
+3. $n$ with a $c^**2$ cross-over
+
+To fulfill all of these tests using one $n$ and to guarantee at least one recursion, we should choose $c^**4$.  Given the range above ($128\leq c < 256$), 
+the first $c^*$ we chose was 192, or the midpoint between 128 and 256.
+$$
+\begin{array}{c|c|c|c|c|c}
+n & \text{cutoff}   & \text{calls to Strassen's} &\text{time in seconds} \\ \hline
+768 & 48  & 2801 & 35.370 \\ 
+768 & 96  & 400  & 31.893 \\
+768 & 192 & 57   & 33.350 \\ 
+768 & 384 & 8    & 43.481 \\ \hline
+\end{array}
+$$
+This new data shows that the optimal cross-over point for $n=768$ and our Strassen's algorithm is 96, indicating a range for the general cross-over point of 96-192.  Combined with our first cross-over range, we know that the optimal global cross-over point, $c_o$, is such that $128\leq c_o <192$.
+
+Now select $c^*=160$, which splits the range 128-192.
+
+$$
+\begin{array}{c|c|c|c|c|c}
+n & \text{cutoff}   & \text{calls to Strassen's} &\text{time in seconds} \\ \hline
+640 & 40  & 2801 & 21.816 \\ 
+640 & 80  & 400  & 19.052 \\
+640 & 160 & 57   & 18.721 \\ 
+640 & 320 & 8    & 21.936 \\ \hline
+\end{array}
+$$
+This new data shows that the optimal cross-over point for $n=640$ and our Strassen's algorithm is 160, indicating a range for the general cross-over point of 160-320.  Combined with our first cross-over range, we know that the optimal global cross-over point is apprximately $160\leq c_o <192$.
+
+Now select $c^*=162$ given the witnessed behavior.
+$$
+\begin{array}{c|c|c|c|c|c}
+n & \text{cutoff}   & \text{calls to Strassen's} &\text{time in seconds} \\ \hline
+648 & 41  & 2801 & 23.049 \\ 
+648 & 81  & 400  & 19.408 \\
+648 & 162 & 57   & 19.932 \\ 
+648 & 324 & 8    & 22.913 \\ \hline
+\end{array}
+$$
+Note that here we find that 81 is the ideal cross-over point for $n=648$.  This indicates that 162 would have been too high for the optimal cross-over point, $c_o$.
+
+For good measure, we will try $c^*=161$.
+
+$$
+\begin{array}{c|c|c|c|c|c}
+n & \text{cutoff}   & \text{calls to Strassen's} &\text{time in seconds} \\ \hline
+644 & 41  & 2801 & 23.672 \\ 
+644 & 81  & 400  & 19.813 \\
+644 & 161 & 57   & 19.240 \\ 
+644 & 322 & 8    & 25.069 \\ \hline
+\end{array}
+$$
+It looks like the optimal point for $n=644$ is 161.  Given the experimentation above, it follows that we would set the global cross-over point for our algorithm at $n=161$.  
+
+We recognize that it is probably not the case that it is exactly $n=161$, in that without bootstrapping many runs at each possible $c^*\text{/}n$ combination, runtime may vary some in these tables.  However, we are confident that we are close enough to the optimal cross-over point given our implementation of Strassen's algorithm and the testing strategies detailed above. 

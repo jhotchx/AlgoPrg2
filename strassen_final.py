@@ -190,7 +190,9 @@ if __name__ == "__main__":
    dimension = int(sys.argv[2])
    cutoff = int(sys.argv[3])
    inputfile = sys.argv[4]
-   inputfile = genFile(dimension,0)
+   import os.path
+   if not os.path.exists(inputfile):
+       inputfile = genFile(dimension,0)
    A,B = process_inputfile(dimension,'test')
    begin = time.clock()
    C = wrapstras(dimension,A,B,cutoff)

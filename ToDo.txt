@@ -1,6 +1,2 @@
-1. Make sure final program takes the correct 3 arguments.
-2. Change output to produce the diagonal.
-3. Test matrices with negatives and real values.
-4. Change program to take a file input.
 5. (John) Go over the analysis of the analytical and experimental solutions
 6. Then we both need to consider the writing part of the report

@@ -165,7 +165,7 @@ def compile_matrix(C11,C12,C21,C22):
     return(C11 + C21)
 
 #@profile
-def wrapstras(d,A,B,cutoff):
+def wrapstras(d,A,B,cutoff=161):
     finalmat = strassen(d,A,B,cutoff)
     if d%2!=0:
         try:
@@ -184,11 +184,9 @@ def get_diag(d,C):
 
 if __name__ == "__main__":
     dimension = int(sys.argv[2])
-    cutoff = int(sys.argv[3])
-    inputfile = sys.argv[4]
+    inputfile = sys.argv[3]
     A,B = process_inputfile(dimension,'test')
-    begin = time.clock()
-    C = wrapstras(dimension,A,B,cutoff)
+    C = wrapstras(dimension,A,B)
     Diag = get_diag(dimension,C)
     for i in Diag:
         print(i)

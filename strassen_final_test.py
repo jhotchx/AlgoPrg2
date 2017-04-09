@@ -187,12 +187,13 @@ def get_diag(d,C):
 
 
 if __name__ == "__main__":
+    kind = int(sys.argv[1])
     dimension = int(sys.argv[2])
     cutoff = int(sys.argv[3])
     inputfile = sys.argv[4]
     import os.path
     if not os.path.exists(inputfile):
-        inputfile = genFile(dimension,0)
+        inputfile = genFile(dimension,kind)
     A,B = process_inputfile(dimension,'test')
     begin = time.clock()
     C = wrapstras(dimension,A,B,cutoff)

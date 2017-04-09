@@ -48,11 +48,8 @@ def genFile(dimension,kind):
         for num in bNumbers:
             outFile.write(str(num)+'\n')
 
-calls=0
 #@profile
 def strassen(d,AMat,BMat,cutoff):
-    global calls
-    calls+=1
     if d <=cutoff:
         return(matmult(AMat,BMat))
     else:

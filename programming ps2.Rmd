@@ -6,6 +6,7 @@ output:
 ---
 
 # Analytical determination of crossover point
+
 If we are treating all operations as equal cost, we can find the optimal crossover point between Strassen's algorithm and the conventional approach to matrix multiplication by simply finding the point at which the number of operations each method adds when the size of the matrix is increased by 1 equalizes. It is at this point that Strassen's algorithm becomes more efficient (in terms of the number of operations) than the conventional algorithm.
 
 The number of operations the conventional method takes is:
@@ -60,7 +61,18 @@ By analyzing the runtime of the programs line-by-line on the same machine, we co
 
 ## Optimization Analysis
 
+We believe the optimization of the subset algorithm came in two ways.  
 
+First, to store matrices, we each used an array of arrays format.  However, Josh used list comprehension to create his sub-matrices.  This is elegant, but it is less efficient than assigning the arrays all at once, as list comprehension builds them one element at a time.  As we know from class, this likely leads to the array getting re-copied to a new memory location every time it is written.  John's matrix was built row by row.
+
+Second, John used a different padding method.  Although both programs pad in the subset function, Josh's program pads to a power of 2 with zeros, all at once.  Not only does this potentially increase memory usage through the size of the matrix (which, at worst, could almost double in the number of rows and columns), but it causes that many more multiplications. Furthermore, his subset command still checked the power of 2 condition on every run of the command (rather than just the first recursion), and so this likely added considerable time.  John's program padded matrices as needed, simply making their dimensions match that of the largest sub-matrix size as needed.  This was costly in terms of many conditional statements, but has one at most adding a row or column, or both of zeros.
+
+With respect to the add and subtract functions, John made the mistake Josh did in the subset function of using list comprehension to make the empty matrices for filling.  Josh leveraged the _.append_ method, which is much faster than simply extending the arrays by values, which is what John did.
+
+More generally, both Josh and John implemented a few potential optimizations naturally, and those appear in the final submitted program.  
+
+1. When processing the input file it is read only once, and each value is stored directly into the matrix to which it belongs.  This saves memory and time by avoiding storage of the entire input file and _then_ splitting it into the sub-matrices.
+2. When subsetting matrices, we select pieces of existing matrices in chunks rather than one element at a time.  This makes the number of reads to the original and the number of writes to the new one decrease substantially.  Although our methods still require saving some intermediate pieces of matrices, it is definitely not one-for-one by element.  
 
 # Experimental determination of crossover point
 Determining an exact cross-over point for Strassen's algorithm is difficult experimentally due to the way that a cross-over point behaves within Strassen's algorithm and minor differences between runtimes as a result of other processes running on the system.  In particular, functional cutoff points for any multiplication of 2 $nxn$ matrices are not on a continuous scale.  For example, when $n=16$, the meaningful cutoff points are all powers of 2: 16,8,4,2.  By meaningful, we mean it is clear that any cutoff between 4 and 7 will still cause the same number of recursions for Strassen's, and therefore will not change the runtime. Therefore, for a given $n$, it is easy to find the optimal cutoff, but it is difficult to find a cross-over point for a general $n$.

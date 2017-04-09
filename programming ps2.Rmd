@@ -26,6 +26,42 @@ $$
 $$
 And we find that the optimal crossover is $n \approx 464$.
 
+# Code Optimization
+
+## Optimization Procedure
+
+As we did on the first assignment, initially we each programmed everything separately.  After programming separately, we compared the essential pieces of our program using a python line profiler.  You can find the output from the line profiler for Josh's and John's programs in figures \ref{JoshProg} and \ref{JohnProg}, respectively.
+
+\begin{figure}[htbp]
+  \begin{center}
+    \includegraphics[width=1\linewidth]{JoshProg.png}
+    \caption{Runtime for Josh's first draft of the program.}
+    \label{JoshProg}
+  \end{center}
+\end{figure}
+
+\begin{figure}[htbp]
+  \begin{center}
+    \includegraphics[width=1\linewidth]{JohnProg.png}
+    \caption{Runtime for John's first draft of the program.}
+    \label{JohnProg}
+  \end{center}
+\end{figure}
+
+By analyzing the runtime of the programs line-by-line on the same machine, we could get a pretty good idea of who had created a better implementation of each of the individual components.  In particular, notice that getting the subsets of the input matrices was about 1.5x more costly in Josh's program than John's, However Josh's program had much faster implementations of the add and subtract functions than John's did.  The best aspects of each were combined in order to achieve the optimized result, in figure \ref{OptProg}.  Note that although Josh's and John's functions originally ran in 7.4 and 9 seconds, respectively, the combined result ran in 6.6 seconds.
+
+\begin{figure}[htbp]
+  \begin{center}
+    \includegraphics[width=1\linewidth]{Optimized.png}
+    \caption{Runtime for Optimized program.}
+    \label{OptProg}
+  \end{center}
+\end{figure}
+
+## Optimization Analysis
+
+
+
 # Experimental determination of crossover point
 Determining an exact cross-over point for Strassen's algorithm is difficult experimentally due to the way that a cross-over point behaves within Strassen's algorithm and minor differences between runtimes as a result of other processes running on the system.  In particular, functional cutoff points for any multiplication of 2 $nxn$ matrices are not on a continuous scale.  For example, when $n=16$, the meaningful cutoff points are all powers of 2: 16,8,4,2.  By meaningful, we mean it is clear that any cutoff between 4 and 7 will still cause the same number of recursions for Strassen's, and therefore will not change the runtime. Therefore, for a given $n$, it is easy to find the optimal cutoff, but it is difficult to find a cross-over point for a general $n$.
 

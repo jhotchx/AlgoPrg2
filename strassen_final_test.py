@@ -1,6 +1,7 @@
 import random
 from math import ceil,log
 import sys
+import time 
 
 def process_inputfile(d,inputfile):
     A = [[0 for e in range(d)] for e in range(d)]
@@ -189,11 +190,13 @@ if __name__ == "__main__":
     dimension = int(sys.argv[2])
     cutoff = int(sys.argv[3])
     inputfile = sys.argv[4]
+    import os.path
+    if not os.path.exists(inputfile):
+        inputfile = genFile(dimension,0)
     A,B = process_inputfile(dimension,'test')
     begin = time.clock()
     C = wrapstras(dimension,A,B,cutoff)
-    Diag = get_diag(dimension,C)
-    for i in Diag:
-        print(i)
+    print(get_diag(dimension,C))
+    print(time.clock()-begin,calls)
 
 

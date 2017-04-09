@@ -10,21 +10,21 @@ If we are treating all operations as equal cost, we can find the optimal crossov
 
 The number of operations the conventional method takes is:
 $$
-O(n) = 2n^3-n^2
+P(n) = 2n^3-n^2
 $$
-  And the number of operations Strassen's algorithm takes can be expressed recursively as:
+There are $n^3$ multiplications, and $n^3-n^2$ additions. The number of operations Strassen's algorithm takes can be expressed recursively as:
 $$ 
-T(n) = 7*T(n/2)+10((n/2)^2)+8((n/2)^2) = 7*T(n/2)+9(n^2/2)
+T(n) = 7T(n/2)+10((n/2)^2)+8((n/2)^2) = 7T(n/2)+9(n^2/2)
 $$
-The solution to this recurrence is:
+At each step, you create 7 subproblems, and do 18 additions/subtractions of square matrices with dimension $n/2$ entailing $18(n/2)^2$ total additions and subtractions. The solution to this recurrence is:
 $$
 T(n) = 7^{\frac{\log(2n)}{\log(2)}}-6n^2
 $$
 Now, finding the exact crossover is as simple as solving the following equation, where the left side is the number of operations added by Strassen's algorithm for an increase of 1 in the size of the matrix, and the right side is the number of operations added by the conventional algorithm:
-  $$
-  7^{\frac{\log(2n)}{\log(2)}}-6n^2-(7^{\frac{\log(2(n-1)}{\log(2)}}-6(n-1)^2)=2n^3-n^2-(2(n-1)^3-(n-1)^2)
-  $$
-    And we find that the optimal crossover is $n \approx 464$.
+$$
+7^{\frac{\log(2n)}{\log(2)}}-6n^2-(7^{\frac{\log(2(n-1)}{\log(2)}}-6(n-1)^2)=2n^3-n^2-(2(n-1)^3-(n-1)^2)
+$$
+And we find that the optimal crossover is $n \approx 464$.
 
 # Experimental determination of crossover point
 Determining an exact cross-over point for Strassen's algorithm is difficult experimentally due to the way that a cross-over point behaves within Strassen's algorithm and minor differences between runtimes as a result of other processes running on the system.  In particular, functional cutoff points for any multiplication of 2 $nxn$ matrices are not on a continuous scale.  For example, when $n=16$, the meaningful cutoff points are all powers of 2: 16,8,4,2.  By meaningful, we mean it is clear that any cutoff between 4 and 7 will still cause the same number of recursions for Strassen's, and therefore will not change the runtime. Therefore, for a given $n$, it is easy to find the optimal cutoff, but it is difficult to find a cross-over point for a general $n$.
@@ -49,7 +49,7 @@ We can be sure based on the data above that the optimal cross-over point for $n=
 
 However, recall from above that for any cross-over point, $c$, such that $128\leq c<256$, Strassen's would have the same running time for the values of $n$ chosen above.  This means that really we have found a lower bound on the optimal, general $n$.  If we were to decide the optimal point was less than 128, it would no longer be optimal for these $n$ values, and therefore not optimal generally.
 
-These tests make it clear that the optimal cross-over is between 64 and 256, as indicated by the optimal runtime occurring for 128.  In order to further narrow down the timing, we can choose $n$ inentionally to shorten the gap.  Consider targeting a cross-over point.  In particular, an ideal value of $n$ for testing would utilize the desired cross-over point that we want to check (i.e. that cross-over point will apply to some $c^*=\frac{n}{2}$ recursion for that $n$ such that if the cross-over point were $c^*-1$, Strassen would recurse additional times).
+These tests make it clear that the optimal cross-over is between 64 and 256, as indicated by the optimal runtime occurring for 128.  In order to further narrow down the timing, we can choose $n$ intentionally to shorten the gap.  Consider targeting a cross-over point.  In particular, an ideal value of $n$ for testing would utilize the desired cross-over point that we want to check (i.e. that cross-over point will apply to some $c^*=\frac{n}{2}$ recursion for that $n$ such that if the cross-over point were $c^*-1$, Strassen would recurse additional times).
 
 In short, to check a target cross-over point, $c^*$, we need an $n$ for which it is a meaningful cross-over point, and to run the following tests:
 
@@ -109,3 +109,16 @@ $$
 It looks like the optimal point for $n=644$ is 161.  Given the experimentation above, it follows that we would set the global cross-over point for our algorithm at $n=161$.  
 
 We recognize that it is probably not the case that it is exactly $n=161$, in that without bootstrapping many runs at each possible $c^*\text{/}n$ combination, runtime may vary some in these tables.  However, we are confident that we are close enough to the optimal cross-over point given our implementation of Strassen's algorithm and the testing strategies detailed above. 
+
+# Discrepancy 
+We observe a significant discrepancy between the analytical and experimental crossover points. After close examination of how the runtime of our implementation of Strassen's algorithm breaks down by line, we have determined that the discrepancy is a result of treating multiplication and addition/subtraction operations identically in the analytical determination of the crossover. In python, multiplication seems to take significantly longer than addition. We found that each 1x1 matrix multiplication takes ~$9.8*10^{-6}$ seconds, whereas the average matrix addition/subtraction (disregarding the dimensions of the matrix) takes ~$7.4*10^{-6}$ seconds. In fact, if we use the ratio of average matrix addition/subtraction time to average multiplication time as the cost of a matrix addition/subtraction in the recurrence, we find an analytical solution much closer to our experimental results.
+In this situation, the recurrence becomes:
+$$
+T(n) = 7T(n/2)+(7.4/9.8)*9(n^2/2)
+$$
+And the solution to this recurrence is 
+$$
+\frac{1}{100} (79*7^{\frac{\log(2n)}{\log(2)}} - 453 n^2)
+$$
+
+Plugging this back into our equation equalizing operations added by each algorithm, we find that the optimal crossover is about 133. Now, undoubtedly this is only an approximate calculation, as we are dealing with microseconds and we are not using the most precise tools, but it makes sense that the analytical cutoff would be slightly below the experimental cutoff, as there are a number of programmatical requirements the analytical calculation does not take into account. These include the cost of splitting a matrix into submatrices, or padding the submatrices with zeroes until they are square (and removing the extra zeroes at the end), or compiling the four submatrices returned by strassen into the final answer. 

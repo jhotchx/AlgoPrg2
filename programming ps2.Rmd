@@ -1,5 +1,7 @@
 ---
 title: "Programming PS2"
+author: "Josh Kaplan & John Hotchkiss"
+date: "4/9/2017"
 output:
   pdf_document: default
   html_notebook: default

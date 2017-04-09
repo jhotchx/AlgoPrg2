@@ -182,7 +182,7 @@ def get_diag(d,C):
 if __name__ == "__main__":
     dimension = int(sys.argv[2])
     inputfile = sys.argv[3]
-    A,B = process_inputfile(dimension,'test')
+    A,B = process_inputfile(dimension,inputfile)
     C = wrapstras(dimension,A,B)
     Diag = get_diag(dimension,C)
     for i in Diag:

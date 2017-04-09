@@ -90,12 +90,9 @@ def strassen(d,AMat,BMat,cutoff):
     return(out)
 
 #@profile
-def matmult(a,b):
-    zip_b = zip(*b)
-    zip_b = list(zip_b)
-    return [[sum(ele_a*ele_b for ele_a, ele_b in zip(row_a, col_b)) 
-             for col_b in zip_b] for row_a in a]
-
+def matmult(AMat,BMat):
+    B = list(zip(*BMat)) #Make row-wise matrix become column-wise
+    return [[sum(Aij*Bjk for Aij, Bjk in zip(Ai, Bk)) for Bk in B] for Ai in AMat]
 
 def subset_matrix(M,x,y,d):
     padr = False

@@ -75,6 +75,7 @@ More generally, both Josh and John implemented a few potential optimizations nat
 2. When subsetting matrices, we select pieces of existing matrices in chunks rather than one element at a time.  This makes the number of reads to the original and the number of writes to the new one decrease substantially.  Although our methods still require saving some intermediate pieces of matrices, it is definitely not one-for-one by element.  
 
 # Experimental determination of crossover point
+
 Determining an exact cross-over point for Strassen's algorithm is difficult experimentally due to the way that a cross-over point behaves within Strassen's algorithm and minor differences between runtimes as a result of other processes running on the system.  In particular, functional cutoff points for any multiplication of 2 $nxn$ matrices are not on a continuous scale.  For example, when $n=16$, the meaningful cutoff points are all powers of 2: 16,8,4,2.  By meaningful, we mean it is clear that any cutoff between 4 and 7 will still cause the same number of recursions for Strassen's, and therefore will not change the runtime. Therefore, for a given $n$, it is easy to find the optimal cutoff, but it is difficult to find a cross-over point for a general $n$.
 
 Consider the following experiment runtimes searching for an initial guess at the optimal cross-over point.
@@ -158,7 +159,14 @@ It looks like the optimal point for $n=644$ is 161.  Given the experimentation a
 
 We recognize that it is probably not the case that it is exactly $n=161$, in that without bootstrapping many runs at each possible $c^*\text{/}n$ combination, runtime may vary some in these tables.  However, we are confident that we are close enough to the optimal cross-over point given our implementation of Strassen's algorithm and the testing strategies detailed above. 
 
+## Reflections Regarding Matrix Type
+
+We did not notice a difference in runtime between matrices of the same size but that have a different type (The types considered included those suggested in the assignment).  We imagine that there could be a runtime difference between matrices that contain integer or float values, however our input processing function assumes, in order to be generally applicable, that all values read in are float, even if they may not be.  As such, we do not see a difference in runtime for between matrices of different types.
+
+There may be a difference in runtime based on the size of the matrix in two ways.  First, padding required to work with non-power of 2 matrices will add some additional time. So non-power of 2 matrices will, for similarly sized matrices, take longer.  Second, and it probably goes without saying, the larger the input matrices, the more operations it will need to make in order to complete.
+
 # Discrepancy 
+
 We observe a significant discrepancy between the analytical and experimental crossover points. After close examination of how the runtime of our implementation of Strassen's algorithm breaks down by line, we have determined that the discrepancy is a result of treating multiplication and addition/subtraction operations identically in the analytical determination of the crossover. In python, multiplication seems to take significantly longer than addition. We found that each 1x1 matrix multiplication takes ~$9.8*10^{-6}$ seconds, whereas the average matrix addition/subtraction (disregarding the dimensions of the matrix) takes ~$7.4*10^{-6}$ seconds. In fact, if we use the ratio of average matrix addition/subtraction time to average multiplication time as the cost of a matrix addition/subtraction in the recurrence, we find an analytical solution much closer to our experimental results.
 In this situation, the recurrence becomes:
 $$
